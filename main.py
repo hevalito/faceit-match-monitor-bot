@@ -2,11 +2,13 @@ import asyncio
 import time
 import requests
 import logging
-from telegram import Bot
+from telegram import Bot, Update
 from telegram.constants import ParseMode
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from datetime import datetime
 from dotenv import load_dotenv
 import os
+import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,7 +17,7 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 FACEIT_API_KEY = os.getenv('FACEIT_API_KEY')
 CHAT_ID = os.getenv('CHAT_ID')
-FACEIT_PLAYER_NICKNAMES = ['baboheval', 'Swarrish', 'sabunu', 'burrrrq', 'Spoon2Moon', 'dA_K0vac', 'Mush_Mush_', '-_HeaveN', 'botdns', 'PSYCHO-DAN', 'xXtini95Xx']  # List of player IDs to monitor
+ALLOWED_USERS = list(map(int, os.getenv('ALLOWED_USERS', '').split(',')))  # Parse as list of integers
 
 # Map image URLs
 MAP_IMAGES = {
@@ -37,6 +39,22 @@ logger = logging.getLogger(__name__)
 
 # Initialize the bot
 bot = Bot(token=TELEGRAM_TOKEN)
+
+not_allowed_text = "You're not authorized for this command."
+
+# check for tg user ID if added to admin list
+def is_user_allowed(update: Update):
+    user_id = update.effective_user.id
+    return user_id in ALLOWED_USERS
+
+# Load players from JSON file
+def load_players():
+    try:
+        with open('players.json', 'r') as file:
+            data = json.load(file)
+            return data['players']
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
 def get_headers():
     return {'Authorization': f'Bearer {FACEIT_API_KEY}'}
@@ -86,10 +104,37 @@ def get_last_match_id(player_id):
 async def send_message(chat_id, text):
     await bot.send_message(chat_id=chat_id, text=text, parse_mode=ParseMode.HTML)
 
+monitoring_task = None
+
+async def start_monitoring(update, context):
+    if not is_user_allowed(update):
+        await update.message.reply_text(not_allowed_text)
+        return
+    
+    global monitoring_task
+    if monitoring_task is None or monitoring_task.cancelled():
+        monitoring_task = asyncio.create_task(monitor_players())
+        await update.message.reply_text("Monitoring started.")
+    else:
+        await update.message.reply_text("Monitoring is already running.")
+
+async def stop_monitoring(update, context):
+    if not is_user_allowed(update):
+        await update.message.reply_text(not_allowed_text)
+        return
+    
+    global monitoring_task
+    if monitoring_task and not monitoring_task.cancelled():
+        monitoring_task.cancel()
+        await update.message.reply_text("Monitoring stopped.")
+    else:
+        await update.message.reply_text("Monitoring is not running.")
+
+
 # Async function to monitor players (60s loop currently)
 async def monitor_players():
-    player_ids = {nickname: get_player_id_by_nickname(nickname) for nickname in FACEIT_PLAYER_NICKNAMES}
-    last_match_ids = {player_id: None for player_id in player_ids.values()}
+    player_nicknames = load_players()
+    player_ids = {nickname: get_player_id_by_nickname(nickname) for nickname in player_nicknames}
     notified_matches = set()
 
     while True:
@@ -163,9 +208,71 @@ async def monitor_players():
 
         await asyncio.sleep(60)
 
+async def list_players(update, context):
+    if not is_user_allowed(update):
+        await update.message.reply_text(not_allowed_text)
+        return
+
+    players = load_players()
+    if players:
+        await update.message.reply_text("Players being tracked:\n" + "\n".join(players))
+    else:
+        await update.message.reply_text("No players are currently being tracked.")
+
+async def add_player(update, context):
+    if not is_user_allowed(update):
+        await update.message.reply_text(not_allowed_text)
+        return
+
+    try:
+        nickname = context.args[0]  # Get the nickname from the command arguments
+        player_id = get_player_id_by_nickname(nickname)  # Check if the player exists
+
+        players = load_players()
+        if nickname not in players:
+            players.append(nickname)
+            with open('players.json', 'w') as file:
+                json.dump({'players': players}, file)
+            await update.message.reply_text(f"Player '{nickname}' added successfully!")
+        else:
+            await update.message.reply_text(f"Player '{nickname}' is already being tracked.")
+    except IndexError:
+        await update.message.reply_text("Usage: /addplayer <Faceit nickname>")
+    except requests.exceptions.HTTPError:
+        await update.message.reply_text("Player not found on FACEIT.")
+
+async def remove_player(update, context):
+    if not is_user_allowed(update):
+        await update.message.reply_text(not_allowed_text)
+        return
+
+    try:
+        nickname = context.args[0]  # Get the nickname from the command arguments
+        players = load_players()
+        if nickname in players:
+            players.remove(nickname)
+            with open('players.json', 'w') as file:
+                json.dump({'players': players}, file)
+            await update.message.reply_text(f"Player '{nickname}' removed successfully!")
+        else:
+            await update.message.reply_text(f"Player '{nickname}' not found in the tracking list.")
+    except IndexError:
+        await update.message.reply_text("Usage: /removeplayer <Faceit nickname>")
+
 # Main function
 if __name__ == '__main__':
     try:
-        asyncio.run(monitor_players())
+        # Create application
+        application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+
+        # Register command handlers
+        application.add_handler(CommandHandler("listplayers", list_players))
+        application.add_handler(CommandHandler("addplayer", add_player))
+        application.add_handler(CommandHandler("removeplayer", remove_player))
+        application.add_handler(CommandHandler("startmonitoring", start_monitoring))
+        application.add_handler(CommandHandler("stopmonitoring", stop_monitoring))
+
+        # Start the bot
+        application.run_polling()
     except Exception as e:
-        logger.error(f'Error in monitoring players: {e}')
+        logger.error(f'Error in main loop: {e}')
