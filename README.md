@@ -24,26 +24,30 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
 
 1. Add or modify the list of Faceit player nicknames in the `FACEIT_PLAYER_NICKNAMES` variable.
 
-## Installation
+## Setup
 
 1. Clone the repository:
+    ```sh
+    git clone https://github.com/hevalito/faceit-match-monitor-bot.git
+    cd faceit-match-monitor-bot
+    ```
 
-```bash
-git clone https://github.com/hevalito/faceit-match-monitor-bot.git
-cd faceit-match-monitor-bot
-```
+2. Create a `.env` file in the root directory and add your configuration variables:
+    ```plaintext
+    TELEGRAM_TOKEN=your-telegram-token
+    FACEIT_API_KEY=your-faceit-api-key
+    CHAT_ID=your-chat-id
+    ```
 
-2. Install the required dependencies:
+3. Install the required packages:
+    ```sh
+    pip install -r requirements.txt
+    ```
 
-```bash
-pip install -r requirements.txt
-```
-
-3. Run the bot:
-
-```bash
-python main.py
-```
+4. Run the bot:
+    ```sh
+    python main.py
+    ```
 
 ## Usage
 ### Start Monitoring
@@ -57,10 +61,10 @@ The bot will automatically start monitoring the specified players' matches and s
 ## Future Ideas
 There are several exciting features planned for future development. Below are some of the future ideas envisioned for the bot:
 
-1. Real-Time Match Notifications: The bot will provide instant notifications when a monitored player starts a new match. This feature ensures that users stay up-to-date with the latest activities of their monitored players without any delays.
-2. Instant Enemy Profile and Stats Analysis: Upon detecting a new match, the bot will immediately analyze the profiles and statistics of enemy players. This analysis will offer valuable insights into the strengths and weaknesses of opponents, helping users better strategize and prepare for the match.
-3. Monitored Players Management via Bot: Users will be able to manage the list of monitored players directly through the bot using specific commands. This functionality will include commands to list all monitored players, add new players, edit player information, and remove players from the monitoring list. Such management capabilities will enhance user convenience by eliminating the need to modify code manually.
-4. Enhanced Match Statistics: The bot will provide more detailed statistics for monitored matches. This will include advanced metrics and deeper analytical insights, offering users a comprehensive view of match performance and trends over time.
+1. Real-Time Match Notifications: The bot will provide instant notifications when a monitored player starts a new match. 
+2. Instant Enemy Profile and Stats Analysis: Upon detecting a new match, the bot will immediately analyze the profiles and statistics of enemy players. 
+3. Monitored Players Management via Bot: Users will be able to manage the list of monitored players directly through the bot using specific commands. This functionality will include commands to list all monitored players, add new players, edit player information, and remove players from the monitoring list. 
+4. Enhanced Match Statistics: The bot will provide more detailed statistics for monitored matches. This will include advanced metrics and deeper analytical insights.
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.

@@ -5,12 +5,30 @@ import logging
 from telegram import Bot
 from telegram.constants import ParseMode
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configurations
-TELEGRAM_TOKEN = 'YOUR-TELEGRAM-BOT-TOKEN'
-FACEIT_API_KEY = 'YOUR-FACEIT-APIKEY'
-FACEIT_PLAYER_NICKNAMES = ['superStronkPlayer129', 'AnotherMegaEloFarmer']  # List of player IDs to monitor
-CHAT_ID = 'YOUR-TELEGRAM-CHAT_ID'
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+FACEIT_API_KEY = os.getenv('FACEIT_API_KEY')
+CHAT_ID = os.getenv('CHAT_ID')
+FACEIT_PLAYER_NICKNAMES = ['megaPlayer69', 'geilerGamer420']  # List of player IDs to monitor
+
+# Map image URLs
+MAP_IMAGES = {
+    'de_dust2': 'https://static.wikia.nocookie.net/counterstrike/images/2/2e/Dust2_CS2.png',
+    'de_mirage': 'https://static.wikia.nocookie.net/counterstrike/images/e/e5/Mirage_CS2.png',
+    'de_nuke': 'https://static.wikia.nocookie.net/counterstrike/images/9/9d/Nuke_CS2.png',
+    'de_overpass': 'https://static.wikia.nocookie.net/counterstrike/images/f/f9/Overpass_CS2.png',
+    'de_vertigo': 'https://static.wikia.nocookie.net/counterstrike/images/c/cb/Vertigo_CS2.png',
+    'de_ancient': 'https://static.wikia.nocookie.net/counterstrike/images/7/7f/Ancient_CS2.png',
+    'de_inferno': 'https://static.wikia.nocookie.net/counterstrike/images/8/82/Inferno_CS2.png',
+    'de_anubis': 'https://static.wikia.nocookie.net/counterstrike/images/7/70/Anubis_CS2.png',
+    'cs_office': 'https://static.wikia.nocookie.net/counterstrike/images/e/ee/Office_CS2.png',
+    # Add other maps as necessary
+}
 
 # Setup logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
