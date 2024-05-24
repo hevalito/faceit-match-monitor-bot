@@ -3,4 +3,4 @@ requests
 python-telegram-bot==21.2
 python-dotenv
 logging
-dateutil
+python-dateutil
