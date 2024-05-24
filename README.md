@@ -6,6 +6,8 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
 
 - Monitors Faceit match statistics for a list of predefined players.
 - Sends notifications about match results to a specified Telegram chat.
+- Allows management of the monitored players list via bot commands.
+- Start and stop monitoring with bot commands.
 
 ## Configuration
 
@@ -20,9 +22,8 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
 1. Obtain a Faceit API key by creating a new application on the Faceit Developer Portal.
 2. Replace `YOUR_FACEIT_API_KEY` in the script with your Faceit API key.
 
-### List of Players to Monitor
-
-1. Add or modify the list of Faceit player nicknames in the `FACEIT_PLAYER_NICKNAMES` variable.
+### List of Allowed Users
+1. Set the ALLOWED_USERS in the .env file with a comma-separated list of Telegram user IDs who are allowed to use the bot commands.
 
 ## Setup
 
@@ -37,6 +38,7 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
     TELEGRAM_TOKEN=your-telegram-token
     FACEIT_API_KEY=your-faceit-api-key
     CHAT_ID=your-chat-id
+    ALLOWED_USERS=user_id1,user_id2,user_id3
     ```
 
 3. Install the required packages:
@@ -51,12 +53,25 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
 
 ## Usage
 ### Start Monitoring
-The bot will automatically start monitoring the specified players' matches and send notifications to the configured Telegram chat.
+Use the command /startmonitoring to start monitoring the specified players' matches.
+
+### Stop Monitoring
+Use the command /stopmonitoring to stop monitoring the matches.
+
+### List Tracked Players
+Use the command /listplayers to list all the players currently being tracked.
+
+### Add a Tracked Player
+Use the command /addplayer <Faceit nickname> to add a new player to the tracking list.
+
+### Remove a Tracked Player
+Use the command /removeplayer <Faceit nickname> to remove a player from the tracking list.
 
 ## Requirements
 - Python 3.6+
 - python-telegram-bot library
 - requests library
+- python-dotenv library
 
 ## Future Ideas
 There are several exciting features planned for future development. Below are some of the future ideas envisioned for the bot:
