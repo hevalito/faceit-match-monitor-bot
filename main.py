@@ -6,6 +6,7 @@ from telegram import Bot
 from telegram.constants import ParseMode
 from datetime import datetime
 from dotenv import load_dotenv
+import os
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,7 +15,7 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 FACEIT_API_KEY = os.getenv('FACEIT_API_KEY')
 CHAT_ID = os.getenv('CHAT_ID')
-FACEIT_PLAYER_NICKNAMES = ['megaPlayer69', 'geilerGamer420']  # List of player IDs to monitor
+FACEIT_PLAYER_NICKNAMES = ['baboheval', 'Swarrish', 'sabunu', 'burrrrq', 'Spoon2Moon', 'dA_K0vac', 'Mush_Mush_', '-_HeaveN', 'botdns', 'PSYCHO-DAN', 'xXtini95Xx']  # List of player IDs to monitor
 
 # Map image URLs
 MAP_IMAGES = {
