@@ -211,6 +211,15 @@ async def monitor_players():
     player_ids = {nickname: get_player_id_by_nickname(nickname) for nickname in player_nicknames}
     notified_matches = set()
 
+    # Initialize notified_matches with the most recent match IDs
+    for player_id in player_ids.values():
+        try:
+            last_match_id = get_last_match_id(player_id)
+            if last_match_id:
+                notified_matches.add(last_match_id)
+        except Exception as e:
+            logger.error(f'Error retrieving initial match info for player (ID: {player_id}): {e}')
+
     while True:
         matches_to_notify = []
         for nickname, player_id in player_ids.items():
@@ -281,6 +290,7 @@ async def monitor_players():
                 logger.error(f'Error processing match {match_id}: {e}')
 
         await asyncio.sleep(60)
+
 
 async def list_players(update, context):
     if not is_user_allowed(update):
