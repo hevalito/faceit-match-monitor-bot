@@ -5,7 +5,8 @@ import logging
 from telegram import Bot, Update
 from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-from datetime import datetime
+from datetime import datetime, timezone
+from dateutil.parser import isoparse
 from dotenv import load_dotenv
 import os
 import json
@@ -58,6 +59,61 @@ def load_players():
 
 def get_headers():
     return {'Authorization': f'Bearer {FACEIT_API_KEY}'}
+
+# Accesses Faceit Statuspage to get the current status
+def get_faceit_status():
+    status_emojis = {
+        "full_outage": "🔴",
+        "partial_outage": "🟠",
+        "under_maintenance": "🟡",
+        "degraded_performance": "🟣",
+        "operational": "🟢"
+    }
+
+    try:
+        response_summary = requests.get('https://www.faceitstatus.com/proxy/www.faceitstatus.com')
+        response_summary.raise_for_status()
+        summary_data = response_summary.json()
+
+        response_incidents = requests.get(
+            'https://www.faceitstatus.com/proxy/www.faceitstatus.com/component_impacts?start_at=2024-02-23T23%3A59%3A59.999Z&end_at=2024-05-24T23%3A59%3A59.999Z'
+        )
+        response_incidents.raise_for_status()
+        incidents_data = response_incidents.json()
+
+        components = summary_data['summary']['components']
+        component_impacts = incidents_data['component_impacts']
+        ongoing_incidents = []
+
+        # Filter ongoing incidents
+        for impact in component_impacts:
+            end_at = impact['end_at']
+            if not end_at or isoparse(end_at) > datetime.now(timezone.utc):
+                ongoing_incidents.append(impact)
+
+        status_summary = "<b>FACEIT Status:</b>\n"
+        for component in components:
+            component_name = component['name']
+            component_id = component['id']
+            component_status = "operational"  # Default status
+
+            for impact in ongoing_incidents:
+                if impact['component_id'] == component_id:
+                    component_status = impact['status']
+                    break
+
+            emoji = status_emojis.get(component_status, "🟢")
+            status_summary += f"{emoji} {component_name}: {component_status.replace('_', ' ').title()}\n"
+
+        if not ongoing_incidents:
+            status_summary += "\nAll systems are operational."
+
+        return status_summary
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching FACEIT status: {e}")
+        return "<b>Error fetching FACEIT status.</b>"
+
 
 # Gets player ID by nickname from Faceit Endpoint
 def get_player_id_by_nickname(nickname):
@@ -130,6 +186,24 @@ async def stop_monitoring(update, context):
     else:
         await update.message.reply_text("Monitoring is not running.")
 
+async def status(update, context):
+    if not is_user_allowed(update):
+        await update.message.reply_text(not_allowed_text)
+        return
+
+    monitoring_status = "active" if monitoring_task and not monitoring_task.cancelled() else "inactive"
+    tracked_players = load_players()
+    num_tracked_players = len(tracked_players)
+    faceit_status = get_faceit_status()
+
+    status_message = (
+        f"<b>Bot Status:</b>\n"
+        f"Monitoring is currently <b>{monitoring_status}</b>.\n"
+        f"Number of players being tracked: <b>{num_tracked_players}</b>.\n\n"
+        f"{faceit_status}"
+    )
+    
+    await update.message.reply_text(status_message, parse_mode=ParseMode.HTML)
 
 # Async function to monitor players (60s loop currently)
 async def monitor_players():
@@ -271,6 +345,7 @@ if __name__ == '__main__':
         application.add_handler(CommandHandler("removeplayer", remove_player))
         application.add_handler(CommandHandler("startmonitoring", start_monitoring))
         application.add_handler(CommandHandler("stopmonitoring", stop_monitoring))
+        application.add_handler(CommandHandler("status", status))
 
         # Start the bot
         application.run_polling()

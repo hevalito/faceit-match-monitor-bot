@@ -3,11 +3,12 @@
 This Telegram bot monitors Faceit match statistics for a list of players and sends notifications about their match results. It offers management of the tracked user via bot commands and contains a small access management feature, so that only given users can command the bot.
 
 ![Telegram](https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Telegram_2019_Logo.svg/120px-Telegram_2019_Logo.svg.png)
+
 ![Faceit](https://upload.wikimedia.org/wikipedia/commons/8/89/FaceIT_banner.png)
 
 ## Features
 
-- Monitors Faceit match statistics for a list of predefined players. 
+- Monitors FACEIT match statistics for a list of predefined players. 
 - Sends notifications about match results to a specified Telegram chat.
 - Allows management of the monitored players list via bot commands.
 - Start and stop monitoring with bot commands.
@@ -18,17 +19,18 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
 1. Obtain a Telegram bot token by creating a new bot with the @BotFather on Telegram. 
 *Optional:* Propagate the possible commands of your bot to BotFather, so that you can select one of the possible commands in the chat inline. Use this template for this after you've used /setcommands with BotFather: 
 ```listplayers - Lists all tracked players
-addplayer - Add another Faceit Nickname to be tracked by the bot
+addplayer - Add another FACEIT Nickname to be tracked by the bot
 removeplayer - Remove a player from tracked players
-startmonitoring - Starts the monitoring for given faceit users
-stopmonitoring - Stops monitoring for new faceit matches of given users.
+startmonitoring - Starts the monitoring for given FACEIT users
+stopmonitoring - Stops monitoring for new FACEIT matches of given users.
+status - gets current FACEIT status and Bot Monitoring status
 ```
 3. Get your Telegram bot token from BotFather. You will add this to the .env File in the Setup process as `TELEGRAM_TOKEN`
 4. Get the Chat ID of a group chat, or a chat session with the bot where the bot should send notifications to. This will be added as `CHAT_ID`to the .env File.
 
 ### Faceit API Configuration
-1. Obtain a Faceit API key by creating a new application on the Faceit Developer Portal.
-2. Replace `YOUR_FACEIT_API_KEY` in the script with your Faceit API key.
+1. Obtain a FACEIT API key by creating a new application on the FACEIT Developer Portal.
+2. Replace `YOUR_FACEIT_API_KEY` in the script with your FACEIT API key.
 ### List of Allowed Users
 1. Set the ALLOWED_USERS in the .env file with a comma-separated list of Telegram user IDs who are allowed to use the bot commands.
 
@@ -71,6 +73,8 @@ Use the command `/addplayer <Faceit nickname>` to add a new player to the tracki
 ### Remove a Tracked Player
 Use the command `/removeplayer <Faceit nickname>` to remove a player from the tracking list.
 
+### Check Bot and FACEIT Status
+Use the command `/status` to get a real time status update of the FACEIT Services and know about the Bot's monitoring status
 
 ## Requirements
 - Python 3.6+
