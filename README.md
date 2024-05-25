@@ -12,13 +12,15 @@ This Telegram bot monitors Faceit match statistics for a list of players and sen
 - Sends notifications about match results to a specified Telegram chat.
 - Allows management of the monitored players list via bot commands.
 - Start and stop monitoring with bot commands.
+- Gets Faceit Service Status from faceitstatus.com and informs the user of The Bot's status
 
 ## Configuration
 ### Telegram Bot Configuration
 
 1. Obtain a Telegram bot token by creating a new bot with the @BotFather on Telegram. 
 *Optional:* Propagate the possible commands of your bot to BotFather, so that you can select one of the possible commands in the chat inline. Use this template for this after you've used /setcommands with BotFather: 
-```listplayers - Lists all tracked players
+```plaintext
+listplayers - Lists all tracked players
 addplayer - Add another FACEIT Nickname to be tracked by the bot
 removeplayer - Remove a player from tracked players
 startmonitoring - Starts the monitoring for given FACEIT users
